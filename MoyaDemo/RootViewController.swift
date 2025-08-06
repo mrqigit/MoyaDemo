@@ -7,6 +7,7 @@
 
 import UIKit
 import Combine
+import Moya
 
 class RootViewController: UIViewController {
     
@@ -55,8 +56,8 @@ class RootViewController: UIViewController {
         loginBtn.tapPublisher()
             .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .sink { [weak self] (sender: UIButton) in
-                // 处理登录逻辑
-                print("登录按钮点击")
+                guard let self = self, let navigationController = self.navigationController else { return }
+                LoginCoordinators(navigationController: navigationController).start()
             }
             .store(in: &cancellables)
         

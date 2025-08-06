@@ -21,7 +21,8 @@ class LoginCoordinators: NSObject, Coordinators {
     }
     
     func start() {
-        
+        let viewModel = LoginViewModel()
+        navigationController.pushViewController(LoginViewController(viewModel: viewModel), animated: true)
     }
 }
 
