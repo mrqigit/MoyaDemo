@@ -6,6 +6,13 @@
 //
 
 import UIKit
+import Combine
+
+// 定义注册流程的导航事件
+enum ForgetNavigationEvent {
+    case foretCompletion
+    case cancel
+}
 
 class ForgetCoordinator: NSObject, Coordinators {
     var parentCoordinator: Coordinators?
@@ -21,8 +28,21 @@ class ForgetCoordinator: NSObject, Coordinators {
     }
     
     func start() {
-        navigationController.pushViewController(ForgotPasswordViewController(viewModel: ForgotViewModel()), animated: true)
+        let viewModel = ForgotViewModel()
+        viewModel.navigationEvent.sink { [weak self] (event) in
+            guard let self = self else { return }
+            switch event {
+            case .foretCompletion:
+                self.parentCoordinator?.childDidFinish(self)
+            case .cancel:
+                self.parentCoordinator?.childDidFinish(self)
+            }
+        }.store(in: &cancellables)
+        navigationController.pushViewController(ForgotPasswordViewController(viewModel: viewModel), animated: true)
     }
+    
+    // 用于存储订阅
+    private var cancellables = Set<AnyCancellable>()
 }
 
 extension ForgetCoordinator: UINavigationControllerDelegate {

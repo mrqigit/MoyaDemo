@@ -27,10 +27,6 @@ class ForgotViewModel: BaseViewModel {
     @Published var newPassword: String = ""
     @Published var confirmPassword: String = ""
     
-    // 状态信息
-    @Published private(set) var isLoading: Bool = false
-    @Published private(set) var errorMessage: String? = nil
-    
     private(set) var isEmailValid: AnyPublisher<Bool, Never>?
     private(set) var isVerificationCodeValid: AnyPublisher<Bool, Never>?
     private(set) var isPasswordValid: AnyPublisher<Bool, Never>?
@@ -40,6 +36,8 @@ class ForgotViewModel: BaseViewModel {
     var resetSuccess: AnyPublisher<Void, Never> {
         _resetSuccess.eraseToAnyPublisher()
     }
+    
+    let navigationEvent = PassthroughSubject<ForgetNavigationEvent, Never>()
     
     // 初始化
     init(authService: ForgetServiceProtocol = ForgetService()) {
@@ -84,42 +82,44 @@ class ForgotViewModel: BaseViewModel {
     
     // 发送验证码
     func sendVerificationCode() {
-        errorMessage = nil
-        isLoading = true
+        alertMessage = nil
+        state = .loading
         
         authService.sendVerificationCode(for: email)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
-                self?.isLoading = false
                 if case .failure(let error) = completion {
-                    self?.errorMessage = error.errorDescription
+                    self?.alertMessage = error.errorDescription
+                    self?.state = .error(error)
                 }
             } receiveValue: { [weak self] _ in
                 self?._currentStep.send(.enterVerificationCode)
+                self?.state = .success
             }.store(in: &cancellables)
     }
     
     // 验证验证码
     func verifyCode() {
-        errorMessage = nil
-        isLoading = true
+        alertMessage = nil
+        state = .loading
         
         authService.verifyCode(code: verificationCode, for: email)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
-                self?.isLoading = false
                 if case .failure(let error) = completion {
-                    self?.errorMessage = error.errorDescription
+                    self?.alertMessage = error.errorDescription
+                    self?.state = .error(error)
                 }
             } receiveValue: { [weak self] _ in
                 self?._currentStep.send(.setNewPassword)
+                self?.state = .success
             }.store(in: &cancellables)
     }
     
     // 重置密码
     func resetPassword() {
-        errorMessage = nil
-        isLoading = true
+        alertMessage = nil
+        state = .loading
         
         let request = ResetPasswordRequest(
             email: email,
@@ -131,12 +131,13 @@ class ForgotViewModel: BaseViewModel {
             .resetPassword(request: request)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
-                self?.isLoading = false
                 if case .failure(let error) = completion {
-                    self?.errorMessage = error.errorDescription
+                    self?.alertMessage = error.errorDescription
+                    self?.state = .error(error)
                 }
             } receiveValue: { [weak self] _ in
                 self?._resetSuccess.send()
+                self?.state = .success
             }.store(in: &cancellables)
     }
     

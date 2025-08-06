@@ -15,7 +15,7 @@ class BaseViewController<VM: BaseViewModel>: UIViewController, BaseView {
     let viewModel: VM
     
     // 加载指示器
-    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    public let activityIndicator = UIActivityIndicatorView(style: .large)
     
     // 存储视图相关的订阅
     public var viewCancellables = Set<AnyCancellable>()
@@ -35,7 +35,6 @@ class BaseViewController<VM: BaseViewModel>: UIViewController, BaseView {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupBaseUI()
         setupUI()
         setupLayout()
         bindViewModel()
@@ -90,7 +89,7 @@ class BaseViewController<VM: BaseViewModel>: UIViewController, BaseView {
     
     // 子类需要实现的方法
     func setupUI() {
-        
+        setupBaseUI()
     }
     
     func setupLayout() {
@@ -98,6 +97,6 @@ class BaseViewController<VM: BaseViewModel>: UIViewController, BaseView {
     }
     
     func bindViewModel() {
-        
+        bindBaseViewModel()
     }
 }

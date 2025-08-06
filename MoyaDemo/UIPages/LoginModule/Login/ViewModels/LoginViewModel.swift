@@ -7,6 +7,6 @@
 
 import UIKit
 
-class LoginViewModel: NSObject {
+class LoginViewModel: BaseViewModel {
 
 }

@@ -17,36 +17,12 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
     private let confirmPasswordTextField = UITextField()
     private let nextButton = UIButton(type: .system)
     private let backButton = UIButton(type: .system)
-    private let errorLabel = UILabel()
-    private let activityIndicator = UIActivityIndicatorView(style: .large)
-    
-    // 订阅管理
-    private var cancellables = Set<AnyCancellable>()
-    
-    // 初始化
-    init(
-        viewModel: ForgotViewModel = ForgotViewModel()
-    ) {
-        self.viewModel = viewModel
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // 生命周期
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupUI()
-        bindViewModel()
-    }
     
     // 设置UI
-    private func setupUI() {
+    internal override func setupUI() {
         view.backgroundColor = .white
         
-        [titleLabel, emailTextField, verificationCodeTextField, newPasswordTextField, confirmPasswordTextField, nextButton, backButton, errorLabel, activityIndicator].forEach {
+        [titleLabel, emailTextField, verificationCodeTextField, newPasswordTextField, confirmPasswordTextField, nextButton, backButton, activityIndicator].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         
@@ -94,15 +70,6 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
                 for: .touchUpInside
             )
         
-        // 错误标签
-        errorLabel.textColor = .red
-        errorLabel.font = .systemFont(ofSize: 14)
-        errorLabel.numberOfLines = 0
-        errorLabel.isHidden = true
-        
-        // 加载指示器
-        activityIndicator.hidesWhenStopped = true
-        
         // 布局
         let stackView = UIStackView(arrangedSubviews: [
             titleLabel,
@@ -110,7 +77,6 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
             verificationCodeTextField,
             newPasswordTextField,
             confirmPasswordTextField,
-            errorLabel,
             nextButton
         ])
         stackView.axis = .vertical
@@ -118,7 +84,6 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stackView)
         view.addSubview(backButton)
-        view.addSubview(activityIndicator)
         
         NSLayoutConstraint.activate(
             [
@@ -136,17 +101,15 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
                     ),
                 backButton.leadingAnchor
                     .constraint(equalTo: view.leadingAnchor, constant: 16),
-            
-                activityIndicator.centerXAnchor
-                    .constraint(equalTo: view.centerXAnchor),
-                activityIndicator.centerYAnchor
-                    .constraint(equalTo: view.centerYAnchor)
             ]
         )
+        
+        super.setupUI()
     }
     
     // 绑定ViewModel
-    private func bindViewModel() {
+    override func bindViewModel() {
+        super.bindViewModel()
         
         emailTextField.textPublisher.assign(to: &viewModel.$email)
         verificationCodeTextField.textPublisher
@@ -162,15 +125,15 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
                 DispatchQueue.main.async {
                     self?.updateUI(for: step)
                 }
-            }.store(in: &cancellables)
+            }.store(in: &viewCancellables)
         
         // 按钮绑定状态
         Publishers
             .CombineLatest4(
                 viewModel.currentStep,
-                viewModel.isEmailValid,
-                viewModel.isVerificationCodeValid,
-                viewModel.isPasswordValid
+                viewModel.isEmailValid!,
+                viewModel.isVerificationCodeValid!,
+                viewModel.isPasswordValid!
             )
             .receive(on: DispatchQueue.main)
             .map { step, emailValid, verificationValid, passValid in
@@ -180,27 +143,7 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
                 case .setNewPassword: return passValid
                 }
             }.assign(to: \.isEnabled, on: nextButton)
-            .store(in: &cancellables)
-        
-        // 错误信息
-        viewModel.$errorMessage.receive(on: DispatchQueue.main)
-            .sink { [weak self] message in
-                DispatchQueue.main.async {
-                    self?.errorLabel.text = message
-                    self?.errorLabel.isHidden = message == nil
-                }
-            }.store(in: &cancellables)
-        
-        // 加载状态
-        viewModel.$isLoading.receive(on: DispatchQueue.main)
-            .sink { [weak self] isLoading in
-                DispatchQueue.main.async {
-                    isLoading ? self?.activityIndicator
-                        .startAnimating() : self?.activityIndicator
-                        .stopAnimating()
-                    self?.view.isUserInteractionEnabled = !isLoading
-                }
-            }.store(in: &cancellables)
+            .store(in: &viewCancellables)
         
         // 邮箱验证状态
         viewModel.resetSuccess
@@ -209,7 +152,7 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
                 DispatchQueue.main.async {
                     self?.showSuccessAlert()
                 }
-            }.store(in: &cancellables)
+            }.store(in: &viewCancellables)
     }
     
     // 更新UI以匹配当前步骤
@@ -256,7 +199,9 @@ class ForgotPasswordViewController: BaseViewController<ForgotViewModel> {
         )
         alert
             .addAction(
-                UIAlertAction(title: "确定", style: .default))
+                UIAlertAction(title: "确定", style: .default, handler: { [weak self] _ in
+                    self?.viewModel.navigationEvent.send(.foretCompletion)
+                }))
         present(alert, animated: true)
     }
 }
