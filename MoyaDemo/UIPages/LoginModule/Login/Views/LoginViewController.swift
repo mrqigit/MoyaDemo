@@ -14,7 +14,6 @@ class LoginViewController: BaseViewController<LoginViewModel> {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.image = UIImage(named: "login_bg")
-        imageView.isUserInteractionEnabled = true
         return imageView
     }()
     
@@ -39,11 +38,20 @@ class LoginViewController: BaseViewController<LoginViewModel> {
         let textField = UITextField()
         textField.font = .systemFont(ofSize: 17, weight: .medium)
         let str: AttrString = """
-\("请输入手机号", .font(.systemFont(ofSize: 17, weight: .medium)), .color(.init(hexString: "#989FA8")))
+\("手机号", .font(.systemFont(ofSize: 17, weight: .medium)), .color(.init(hexString: "#989FA8")))
 """
         textField.attributedPlaceholder = str.attributedString
         textField.addDynamicPadding(padding: .symmetric(horizontal: 30, vertical: 15))
-        textField.applyBorder(border: .bottom(color: .init(hexString: "#E4E7ED"), width: 1))
+        return textField
+    }()
+    
+    lazy var verificationTF: UITextField = {
+        let textField = UITextField()
+        textField.font = .systemFont(ofSize: 17, weight: .medium)
+        let str: AttrString = """
+\("验证码", .font(.systemFont(ofSize: 17, weight: .medium)), .color(.init(hexString: "#989FA8")))
+"""
+        textField.attributedPlaceholder = str.attributedString
         return textField
     }()
     
@@ -66,26 +74,30 @@ class LoginViewController: BaseViewController<LoginViewModel> {
         }
         
         titleLabel.snp.makeConstraints { make in
-            make.bottom.equalTo(tipLabel.snp_topMargin).offset(-10)
+            make.bottom.equalTo(tipLabel.snp_topMargin).offset(-20)
             make.left.right.equalTo(50)
         }
         
         view.addSubview(mobileTF)
         mobileTF.snp.makeConstraints { make in
-            make.left.right.equalTo(30)
-            make.top.equalTo(topBgView.snp_bottomMargin).offset(18)
+            make.left.equalTo(30)
+            make.right.equalTo(-30)
+            make.top.equalTo(topBgView.snp_bottomMargin).offset(36)
         }
+        
+        view.layoutIfNeeded()
+        
+        mobileTF.applyBorder(border: .bottom(color: .init(hexString: "#E4E7ED"), width: 1))
     }
     
     override func bindViewModel() {
         super.bindViewModel()
         
         // 订阅点击事件
-        titleLabel.tapPublisher()
+        tipLabel.tapPublisher()
             .sink(receiveValue: { [weak self] _ in
-                guard let self = self else { return }
-                guard let navigationController = self.navigationController else { return }
-                RegistrationCoordinator(navigationController: navigationController).start()
+                self?.view.endEditing(true) // 收起键盘
+                self?.viewModel.registerAction()
             })
             .store(in: &viewCancellables)
     }

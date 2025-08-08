@@ -16,7 +16,7 @@ enum RegistrationNavigationEvent {
 
 // 注册协调器
 class RegistrationCoordinator: NSObject, Coordinators {
-    
+    var cancellables: Set<AnyCancellable> = []
     weak var parentCoordinator: Coordinators?
     var children: [Coordinators] = []
     var navigationController: UINavigationController
@@ -44,9 +44,6 @@ class RegistrationCoordinator: NSObject, Coordinators {
         
         navigationController.pushViewController(viewController, animated: true)
     }
-    
-    // 用于存储订阅
-    private var cancellables = Set<AnyCancellable>()
 }
 
 extension RegistrationCoordinator: UINavigationControllerDelegate {

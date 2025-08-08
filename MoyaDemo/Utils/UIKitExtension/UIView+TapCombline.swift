@@ -26,7 +26,12 @@ extension UIView {
         
         // 添加手势并启用用户交互
         addGestureRecognizer(tapGesture)
-        isUserInteractionEnabled = true
+        
+        var userInteractionEnabledView: UIView? = self
+        while userInteractionEnabledView?.isUserInteractionEnabled == false {
+            userInteractionEnabledView?.isUserInteractionEnabled = true
+            userInteractionEnabledView = userInteractionEnabledView?.superview
+        }
         
         return publisher.eraseToAnyPublisher()
     }

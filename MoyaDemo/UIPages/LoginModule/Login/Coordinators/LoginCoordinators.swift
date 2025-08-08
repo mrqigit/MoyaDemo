@@ -6,9 +6,22 @@
 //
 
 import UIKit
+import Combine
+
+enum LoginNavigationEvent {
+    case loginCompletion
+    case register
+    case passLogin
+    case verificationLogin
+    case forgetPassword
+    case protocolRead
+    case cancel
+}
 
 class LoginCoordinators: NSObject, Coordinators {
-    var parentCoordinator: Coordinators?
+    var cancellables: Set<AnyCancellable> = []
+    
+    weak var parentCoordinator: Coordinators? = nil
     
     var children: [Coordinators] = []
     
@@ -22,12 +35,48 @@ class LoginCoordinators: NSObject, Coordinators {
     
     func start() {
         let viewModel = LoginViewModel()
-        navigationController.pushViewController(LoginViewController(viewModel: viewModel), animated: true)
+        navigationController
+            .pushViewController(
+                LoginViewController(viewModel: viewModel),
+                animated: true
+            )
+        
+        viewModel.navigationEvent.sink { [weak self] (event) in
+            guard let self = self else { return }
+            switch event {
+            case .loginCompletion:
+                self.parentCoordinator?.childDidFinish(self)
+            case .register:
+                let register = RegistrationCoordinator(
+                    navigationController: self.navigationController
+                )
+                addChild(register)
+                register.start()
+            case .passLogin:
+                print("\(event.self)")
+            case .verificationLogin:
+                print("\(event.self)")
+            case .forgetPassword:
+                let forget = ForgetCoordinator(
+                    navigationController: self.navigationController
+                )
+                addChild(forget)
+                forget.start()
+            case .protocolRead:
+                print("\(event.self)")
+            case .cancel:
+                self.parentCoordinator?.childDidFinish(self)
+            }
+        }.store(in: &cancellables)
     }
 }
 
 extension LoginCoordinators: UINavigationControllerDelegate {
-    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+    func navigationController(
+        _ navigationController: UINavigationController,
+        didShow viewController: UIViewController,
+        animated: Bool
+    ) {
         guard let fromViewController = kg_navigationController(navigationController, didShow: viewController, animated: animated) else {
             return
         }

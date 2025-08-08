@@ -6,17 +6,25 @@
 //
 
 import UIKit
+import Combine
 
 protocol Coordinators: AnyObject {
     
     var parentCoordinator: Coordinators? { get set }
     var children: [Coordinators] { get set }
+    var cancellables: Set<AnyCancellable> { get set }
     var navigationController: UINavigationController { get set }
     
     func start()
 }
 
 extension Coordinators {
+    
+    func addChild(_ coordinator: Coordinators) {
+        children.append(coordinator)
+        coordinator.parentCoordinator = self
+    }
+    
     func childDidFinish(_ child: Coordinators) {
         if let index = children.firstIndex(where: { $0 === child }) {
             children.remove(at: index)

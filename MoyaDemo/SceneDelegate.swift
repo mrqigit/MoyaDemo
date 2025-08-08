@@ -18,8 +18,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         window.backgroundColor = .white
         window.bounds = UIScreen.main.bounds
-        window.rootViewController = UINavigationController(rootViewController: RootViewController())
+        let rootCtrl = UINavigationController()
+        window.rootViewController = rootCtrl
         window.makeKeyAndVisible()
+        
+        LoginCoordinators(navigationController: rootCtrl).start()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

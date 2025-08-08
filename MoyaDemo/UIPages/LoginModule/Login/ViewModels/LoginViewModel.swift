@@ -6,7 +6,23 @@
 //
 
 import UIKit
+import Combine
 
 class LoginViewModel: BaseViewModel {
-
+    
+    // 导航事件
+    var navigationEvent = PassthroughSubject<LoginNavigationEvent, Never>()
+    
+    // 登录服务
+    private let loginService: LoginServiceProtocol
+    
+    init(service: LoginServiceProtocol = LoginService()) {
+        self.loginService = service
+    }
+    
+    func registerAction() {
+        DispatchQueue.main.async { [weak self] in
+            self?.navigationEvent.send(.register)
+        }
+    }
 }

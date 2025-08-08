@@ -15,7 +15,9 @@ enum ForgetNavigationEvent {
 }
 
 class ForgetCoordinator: NSObject, Coordinators {
-    var parentCoordinator: Coordinators?
+    var cancellables: Set<AnyCancellable> = []
+    
+    weak var parentCoordinator: Coordinators?
     
     var children: [Coordinators] = []
     
@@ -40,9 +42,6 @@ class ForgetCoordinator: NSObject, Coordinators {
         }.store(in: &cancellables)
         navigationController.pushViewController(ForgotPasswordViewController(viewModel: viewModel), animated: true)
     }
-    
-    // 用于存储订阅
-    private var cancellables = Set<AnyCancellable>()
 }
 
 extension ForgetCoordinator: UINavigationControllerDelegate {

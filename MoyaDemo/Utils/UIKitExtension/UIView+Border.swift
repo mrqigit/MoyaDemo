@@ -388,26 +388,26 @@ extension UIView {
         borderLayer.lineWidth = width
                 
         let path = UIBezierPath()
-        let rect = bounds.insetBy(dx: width/2, dy: width/2)
+//        let rect = bounds.insetBy(dx: width/2, dy: width/2)
                 
         if edges.contains(.top) {
-            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            path.move(to: CGPoint(x: 0, y: 0))
+            path.addLine(to: CGPoint(x: bounds.size.width, y: 0))
         }
                 
         if edges.contains(.left) {
-            path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+            path.move(to: CGPoint(x: 0, y: 0))
+            path.addLine(to: CGPoint(x: 0, y: bounds.size.height))
         }
                 
         if edges.contains(.bottom) {
-            path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            path.move(to: CGPoint(x: 0, y: bounds.size.height))
+            path.addLine(to: CGPoint(x: bounds.size.width, y: bounds.size.height))
         }
                 
         if edges.contains(.right) {
-            path.move(to: CGPoint(x: rect.maxX, y: rect.minY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            path.move(to: CGPoint(x: bounds.size.width, y: 0))
+            path.addLine(to: CGPoint(x: bounds.size.width, y: bounds.size.height))
         }
                 
         borderLayer.path = path.cgPath
@@ -517,13 +517,6 @@ extension UIView {
             applyBorder(border: currentBorder)
         } else if keyPath == "bounds", context == &AssociatedKeys.currentDashBorder, let currentDashBorder = currentDashBorder {
             applyDashBorder(dashBorder: currentDashBorder)
-        } else {
-            super.observeValue(
-                forKeyPath: keyPath,
-                of: object,
-                change: change,
-                context: context
-            )
         }
     }
     
