@@ -59,7 +59,7 @@ class RegistrationViewModel: BaseViewModel {
                     try self.validationService.validateForm(form)
                     return true
                 } catch {
-                    handleError(error)
+//                    handleError(error)
                     return false
                 }
             }

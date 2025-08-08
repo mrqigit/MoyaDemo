@@ -42,6 +42,9 @@ class RegistrationViewController: BaseViewController<RegistrationViewModel> {
         registerButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(registerButton)
         
+        cancelButton.target = self
+        cancelButton.action = #selector(cancelTapped)
+        
         // 布局输入框
         setupInputFieldsLayout()
     }

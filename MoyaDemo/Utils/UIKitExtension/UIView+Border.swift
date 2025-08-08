@@ -293,7 +293,7 @@ extension UIView {
     }
     
     // 存储是否已添加观察者的标记
-    private var hasAddedBorderObserver: Bool {
+    public var hasAddedBorderObserver: Bool {
         get {
             return (
                 objc_getAssociatedObject(
@@ -331,7 +331,7 @@ extension UIView {
     }
         
     // 存储是否已添加虚线边框观察者
-    private var hasAddedDashBorderObserver: Bool {
+    public var hasAddedDashBorderObserver: Bool {
         get {
             return (
                 objc_getAssociatedObject(

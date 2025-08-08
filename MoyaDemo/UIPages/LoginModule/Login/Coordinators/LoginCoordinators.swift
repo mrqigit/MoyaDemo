@@ -19,11 +19,12 @@ enum LoginNavigationEvent {
 }
 
 class LoginCoordinators: NSObject, Coordinators {
-    var cancellables: Set<AnyCancellable> = []
     
-    weak var parentCoordinator: Coordinators? = nil
+    private var cancellables = Set<AnyCancellable>()
     
-    var children: [Coordinators] = []
+    weak var parentCoordinator: (any Coordinators)? = nil
+    
+    var children: [any Coordinators] = []
     
     var navigationController: UINavigationController
     
@@ -35,13 +36,10 @@ class LoginCoordinators: NSObject, Coordinators {
     
     func start() {
         let viewModel = LoginViewModel()
-        navigationController
-            .pushViewController(
-                LoginViewController(viewModel: viewModel),
-                animated: true
-            )
-        
-        viewModel.navigationEvent.sink { [weak self] (event) in
+        let loginCtrl = LoginViewController(viewModel: viewModel)
+        viewModel.navigationEvent
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] (event) in
             guard let self = self else { return }
             switch event {
             case .loginCompletion:
@@ -68,6 +66,12 @@ class LoginCoordinators: NSObject, Coordinators {
                 self.parentCoordinator?.childDidFinish(self)
             }
         }.store(in: &cancellables)
+        
+        navigationController
+            .pushViewController(
+                loginCtrl,
+                animated: true
+            )
     }
 }
 

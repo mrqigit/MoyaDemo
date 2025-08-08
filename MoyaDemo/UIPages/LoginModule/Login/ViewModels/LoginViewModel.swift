@@ -18,11 +18,10 @@ class LoginViewModel: BaseViewModel {
     
     init(service: LoginServiceProtocol = LoginService()) {
         self.loginService = service
+        super.init()
     }
     
     func registerAction() {
-        DispatchQueue.main.async { [weak self] in
-            self?.navigationEvent.send(.register)
-        }
+        navigationEvent.send(.register)
     }
 }

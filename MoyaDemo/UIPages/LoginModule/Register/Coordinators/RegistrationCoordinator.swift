@@ -16,9 +16,10 @@ enum RegistrationNavigationEvent {
 
 // 注册协调器
 class RegistrationCoordinator: NSObject, Coordinators {
-    var cancellables: Set<AnyCancellable> = []
-    weak var parentCoordinator: Coordinators?
-    var children: [Coordinators] = []
+    
+    private var cancellables = Set<AnyCancellable>()
+    weak var parentCoordinator: (any Coordinators)?
+    var children: [any Coordinators] = []
     var navigationController: UINavigationController
     
     init(navigationController: UINavigationController) {
@@ -28,11 +29,13 @@ class RegistrationCoordinator: NSObject, Coordinators {
     }
     
     func start() {
-        let viewModel = RegistrationViewModel()
-        let viewController = RegistrationViewController(viewModel: viewModel)
         
+        let viewModel = RegistrationViewModel()
+        let registerCtrl = RegistrationViewController(viewModel: viewModel)
         // 监听导航事件
-        viewModel.navigationEvent.sink { [weak self] event in
+        viewModel.navigationEvent
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in
             guard let self = self else { return }
             switch event {
             case .registrationCompleted:
@@ -41,8 +44,7 @@ class RegistrationCoordinator: NSObject, Coordinators {
                 self.parentCoordinator?.childDidFinish(self)
             }
         }.store(in: &cancellables)
-        
-        navigationController.pushViewController(viewController, animated: true)
+        navigationController.pushViewController(registerCtrl, animated: true)
     }
 }
 

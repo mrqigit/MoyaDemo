@@ -8,11 +8,6 @@
 import UIKit
 import ObjectiveC
 
-// 存储内边距的关联对象Key
-private var paddingKey: UInt8 = 0
-// 存储原始方法实现的关联对象Key
-private var originalTextRectKey: UInt8 = 0
-
 enum PaddingEdge {
     case none
     case left(space: CGFloat = 0)

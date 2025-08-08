@@ -15,11 +15,12 @@ enum ForgetNavigationEvent {
 }
 
 class ForgetCoordinator: NSObject, Coordinators {
-    var cancellables: Set<AnyCancellable> = []
     
-    weak var parentCoordinator: Coordinators?
+    private var cancellables = Set<AnyCancellable>()
     
-    var children: [Coordinators] = []
+    weak var parentCoordinator: (any Coordinators)?
+    
+    var children: [any Coordinators] = []
     
     var navigationController: UINavigationController
     

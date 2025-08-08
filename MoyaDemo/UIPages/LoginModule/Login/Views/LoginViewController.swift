@@ -42,6 +42,8 @@ class LoginViewController: BaseViewController<LoginViewModel> {
 """
         textField.attributedPlaceholder = str.attributedString
         textField.addDynamicPadding(padding: .symmetric(horizontal: 30, vertical: 15))
+        textField.accept = "^[0-9]$"
+        textField.maxLength = 11
         return textField
     }()
     
@@ -52,6 +54,7 @@ class LoginViewController: BaseViewController<LoginViewModel> {
 \("验证码", .font(.systemFont(ofSize: 17, weight: .medium)), .color(.init(hexString: "#989FA8")))
 """
         textField.attributedPlaceholder = str.attributedString
+        textField.addDynamicPadding(padding: .symmetric(horizontal: 30, vertical: 15))
         return textField
     }()
     
@@ -85,9 +88,29 @@ class LoginViewController: BaseViewController<LoginViewModel> {
             make.top.equalTo(topBgView.snp_bottomMargin).offset(36)
         }
         
-        view.layoutIfNeeded()
+        view.addSubview(verificationTF)
+        verificationTF.snp.makeConstraints { make in
+            make.left.equalTo(30)
+            make.right.equalTo(-30)
+            make.top.equalTo(mobileTF.snp_bottomMargin).offset(10)
+        }
         
-        mobileTF.applyBorder(border: .bottom(color: .init(hexString: "#E4E7ED"), width: 1))
+//        view.layoutIfNeeded()
+        
+        
+        
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        
+        if !mobileTF.hasAddedBorderObserver {
+            mobileTF.applyBorder(border: .bottom(color: .init(hexString: "#E4E7ED"), width: 1))
+        }
+        
+        if !verificationTF.hasAddedBorderObserver {
+            verificationTF.applyBorder(border: .bottom(color: .init(hexString: "#E4E7ED"), width: 1))
+        }
     }
     
     override func bindViewModel() {

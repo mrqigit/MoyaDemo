@@ -10,9 +10,8 @@ import Combine
 
 protocol Coordinators: AnyObject {
     
-    var parentCoordinator: Coordinators? { get set }
-    var children: [Coordinators] { get set }
-    var cancellables: Set<AnyCancellable> { get set }
+    var parentCoordinator: (any Coordinators)? { get set }
+    var children: [any Coordinators] { get set }
     var navigationController: UINavigationController { get set }
     
     func start()
@@ -20,12 +19,12 @@ protocol Coordinators: AnyObject {
 
 extension Coordinators {
     
-    func addChild(_ coordinator: Coordinators) {
+    func addChild(_ coordinator: any Coordinators) {
         children.append(coordinator)
         coordinator.parentCoordinator = self
     }
     
-    func childDidFinish(_ child: Coordinators) {
+    func childDidFinish(_ child: any Coordinators) {
         if let index = children.firstIndex(where: { $0 === child }) {
             children.remove(at: index)
         }
